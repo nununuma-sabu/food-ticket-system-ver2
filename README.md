@@ -50,6 +50,13 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 # 依存パッケージのインストール
 pip install -r requirements.txt
 
+# 環境変数の設定
+# .envファイルを作成し、以下の内容を記述してください（必要に応じて変更）
+# SECRET_KEY="supersecretkey"
+# ALGORITHM="HS256"
+# ACCESS_TOKEN_EXPIRE_MINUTES=720
+# DATABASE_URL="sqlite:///./sql_app.db"
+
 # サーバー起動 (ポート8000)
 uvicorn main:app --reload
 ```
@@ -62,6 +69,10 @@ uvicorn main:app --reload
 cd frontend
 # 依存パッケージのインストール
 npm install
+
+# 環境変数の設定
+# .envファイルを作成し、以下の内容を記述してください
+# VITE_API_BASE_URL=http://localhost:8000
 
 # 開発サーバー起動 (ポート5173等)
 npm run dev
