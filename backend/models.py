@@ -68,5 +68,23 @@ class OrderItemOption(Base):
     order_item_id = Column(Integer, ForeignKey("order_items.id"), primary_key=True)
     option_id = Column(Integer, ForeignKey("options.id"), primary_key=True)
 
+
+class Prefecture(Base):
+    __tablename__ = "prefectures"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+
+    cities = relationship("City", back_populates="prefecture")
+
+class City(Base):
+    __tablename__ = "cities"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    prefecture_id = Column(Integer, ForeignKey("prefectures.id"))
+
+    prefecture = relationship("Prefecture", back_populates="cities")
+
 # Add relationship to Item
 Item.options = relationship("Option", secondary="item_options")
