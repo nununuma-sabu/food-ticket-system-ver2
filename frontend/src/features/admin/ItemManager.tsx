@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import type { Item } from '../../types';
 
 export const ItemManager = () => {
@@ -20,7 +20,7 @@ export const ItemManager = () => {
 
     const fetchItems = async () => {
         try {
-            const res = await axios.get('http://localhost:8000/items'); // Removed trailing slash
+            const res = await api.get('/items'); // Removed trailing slash
             setItems(res.data);
         } catch (e) {
             console.error(e);
@@ -65,10 +65,10 @@ export const ItemManager = () => {
 
             if (editingItem && editingItem.id) {
                 // Update
-                await axios.put(`http://localhost:8000/items/${editingItem.id}`, itemData, config);
+                await api.put(`/items/${editingItem.id}`, itemData, config);
             } else {
                 // Create
-                await axios.post('http://localhost:8000/items/', itemData, config);
+                await api.post('/items/', itemData, config);
             }
             setIsModalOpen(false);
             fetchItems();

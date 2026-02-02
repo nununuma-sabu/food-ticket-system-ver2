@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api';
 
 export const AdminLogin = () => {
     const [name, setName] = useState('');
@@ -17,7 +17,7 @@ export const AdminLogin = () => {
             formData.append('username', name);
             formData.append('password', password);
 
-            const response = await axios.post('http://localhost:8000/token', formData);
+            const response = await api.post('/token', formData);
 
             // Store real token
             localStorage.setItem('admin_token', response.data.access_token);
