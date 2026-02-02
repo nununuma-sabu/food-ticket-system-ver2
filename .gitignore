@@ -60,8 +60,3 @@ logs/
 htmlcov/
 .pytest_cache/
 coverage/
-
-# AI Agent related (Private)
-.agent/
-.gemini/
-.cortex/
