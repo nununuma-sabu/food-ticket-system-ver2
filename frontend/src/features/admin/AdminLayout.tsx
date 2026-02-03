@@ -1,11 +1,13 @@
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
 
 export const AdminLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { logout } = useAuth();
 
     const handleLogout = () => {
-        localStorage.removeItem('admin_token');
+        logout();
         navigate('/admin/login');
     };
 

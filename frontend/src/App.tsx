@@ -6,6 +6,7 @@ import { AdminDashboard } from './features/admin/AdminDashboard';
 import { ItemManager } from './features/admin/ItemManager';
 import { OrderManager } from './features/admin/OrderManager';
 import { AdminLayout } from './features/admin/AdminLayout';
+import { RequireAuth } from './features/auth/RequireAuth';
 import './App.css';
 
 function App() {
@@ -16,7 +17,11 @@ function App() {
           <Route path="/" element={<KioskApp />} />
 
           {/* Admin Routes wrapped in Layout */}
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={
+            <RequireAuth>
+              <AdminLayout />
+            </RequireAuth>
+          }>
             <Route index element={<AdminDashboard />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="items" element={<ItemManager />} />

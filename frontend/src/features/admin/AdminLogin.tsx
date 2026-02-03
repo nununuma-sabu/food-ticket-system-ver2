@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api';
+import { useAuth } from '../auth/useAuth';
 
 export const AdminLogin = () => {
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -19,8 +21,11 @@ export const AdminLogin = () => {
 
             const response = await api.post('/token', formData);
 
-            // Store real token
-            localStorage.setItem('admin_token', response.data.access_token);
+            // Use context login
+            login(response.data.access_token);
+            // Explicitly save to sessionStorage to ensure persistence before navigation
+            sessionStorage.setItem('auth_token', response.data.access_token);
+
             navigate('/admin/dashboard');
         } catch (err) {
             setError('ログインに失敗しました');

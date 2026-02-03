@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api';
 import type { Order } from '../../types';
 
 export const OrderManager = () => {
@@ -9,11 +9,7 @@ export const OrderManager = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('admin_token');
-            const config = {
-                headers: { Authorization: `Bearer ${token}` }
-            };
-            const res = await axios.get('http://localhost:8000/orders', config);
+            const res = await api.get('/orders');
             setOrders(res.data);
         } catch (error) {
             console.error("Failed to fetch orders", error);
@@ -31,11 +27,7 @@ export const OrderManager = () => {
 
     const handleStatusUpdate = async (orderId: number, newStatus: string) => {
         try {
-            const token = localStorage.getItem('admin_token');
-            const config = {
-                headers: { Authorization: `Bearer ${token}` }
-            };
-            await axios.put(`http://localhost:8000/orders/${orderId}/status`, { status: newStatus }, config);
+            await api.put(`/orders/${orderId}/status`, { status: newStatus });
             // Optimistic update or refresh
             fetchOrders();
         } catch (error) {

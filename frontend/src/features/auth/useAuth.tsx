@@ -11,13 +11,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [token, setToken] = useState<string | null>(null);
+    // Initialize from sessionStorage
+    const [token, setToken] = useState<string | null>(() => sessionStorage.getItem('auth_token'));
 
     useEffect(() => {
         if (token) {
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            sessionStorage.setItem('auth_token', token);
         } else {
             delete api.defaults.headers.common['Authorization'];
+            sessionStorage.removeItem('auth_token');
         }
     }, [token]);
 
