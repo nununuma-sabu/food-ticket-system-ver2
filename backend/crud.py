@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session, joinedload
 def get_items(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Item).options(joinedload(models.Item.options)).offset(skip).limit(limit).all()
 
-def create_item(db: Session, item: schemas.ItemCreate):
-    db_item = models.Item(**item.dict())
+def create_item(db: Session, item: schemas.ItemCreate, store_id: int):
+    db_item = models.Item(**item.dict(), store_id=store_id)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)

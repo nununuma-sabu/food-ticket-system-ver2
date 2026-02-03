@@ -1,15 +1,24 @@
 from backend import crud, schemas, models
 
+def create_dummy_store(db):
+    store = crud.get_store_by_name(db, "test_store")
+    if not store:
+        store = crud.create_store(db, schemas.StoreCreate(name="test_store", password="pass"))
+    return store
+
 def test_create_item(db_session):
+    store = create_dummy_store(db_session)
     item_in = schemas.ItemCreate(name="Test Item", price=1000, category="Test", stock=10)
-    item = crud.create_item(db_session, item_in)
+    item = crud.create_item(db_session, item_in, store_id=store.id)
     assert item.name == "Test Item"
     assert item.stock == 10
     assert item.id is not None
+    assert item.store_id == store.id
 
 def test_update_item(db_session):
+    store = create_dummy_store(db_session)
     item_in = schemas.ItemCreate(name="Item 1", price=500, stock=5)
-    item = crud.create_item(db_session, item_in)
+    item = crud.create_item(db_session, item_in, store_id=store.id)
     
     update_data = schemas.ItemCreate(name="Updated Item", price=600, stock=20)
     updated_item = crud.update_item(db_session, item.id, update_data)
@@ -18,9 +27,10 @@ def test_update_item(db_session):
     assert updated_item.stock == 20
 
 def test_checkout_order_deducts_stock(db_session):
+    store = create_dummy_store(db_session)
     # Setup item
     item_in = schemas.ItemCreate(name="Ramen", price=1000, stock=10)
-    item = crud.create_item(db_session, item_in)
+    item = crud.create_item(db_session, item_in, store_id=store.id)
     
     # Setup order
     order_in = schemas.OrderCreate(items=[
@@ -41,7 +51,8 @@ def test_checkout_order_deducts_stock(db_session):
     assert db_order.payment_method == "cash"
 
 def test_checkout_double_payment_prevention(db_session):
-    item = crud.create_item(db_session, schemas.ItemCreate(name="I", price=100, stock=10))
+    store = create_dummy_store(db_session)
+    item = crud.create_item(db_session, schemas.ItemCreate(name="I", price=100, stock=10), store_id=store.id)
     order = crud.create_order(db_session, schemas.OrderCreate(items=[
         schemas.OrderItemCreate(item_id=item.id, quantity=1, option_ids=[])
     ]))
@@ -69,7 +80,8 @@ def test_crud_not_found_cases(db_session):
     assert crud.add_items_to_order(db_session, 999, []) is None
 
 def test_add_items_to_order(db_session):
-    item = crud.create_item(db_session, schemas.ItemCreate(name="Item", price=100))
+    store = create_dummy_store(db_session)
+    item = crud.create_item(db_session, schemas.ItemCreate(name="Item", price=100), store_id=store.id)
     order = crud.create_order(db_session, schemas.OrderCreate(items=[]))
     
     order = crud.add_items_to_order(db_session, order.id, [

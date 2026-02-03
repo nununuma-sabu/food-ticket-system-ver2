@@ -82,7 +82,7 @@ def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @app.post("/items/", response_model=schemas.Item)
 def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db), current_user: schemas.Store = Depends(get_current_user)):
-    return crud.create_item(db=db, item=item)
+    return crud.create_item(db=db, item=item, store_id=current_user.id)
 
 @app.put("/items/{item_id}", response_model=schemas.Item)
 def update_item(item_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db), current_user: schemas.Store = Depends(get_current_user)):

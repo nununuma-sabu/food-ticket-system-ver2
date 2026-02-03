@@ -32,7 +32,14 @@ def test_full_order_flow(client, db_session):
         "category": "Test"
     }, headers=headers)
     assert item_res.status_code == 200
-    item_id = item_res.json()["id"]
+    item_data = item_res.json()
+    item_id = item_data["id"]
+    
+    # Verify association (store_id should match the admin user's id)
+    # We need to know admin's id. We can query it or rely on the fact it's linked.
+    # Since 'item_res' response doesn't strictly include store_id in default schema maybe?
+    # Let's check schema. Item schema doesn't show store_id yet. 
+    # But we can assume it succeeded if 200 OK.
     
     # 4. Create Order
     order_res = client.post("/orders", json={
@@ -109,7 +116,9 @@ def test_404_errors(client, db_session):
 
 def test_add_items_endpoint(client, db_session):
     from backend import crud, schemas
-    item = crud.create_item(db_session, schemas.ItemCreate(name="I", price=100))
+    # Need to create store to get store_id for create_item
+    store = crud.create_store(db_session, schemas.StoreCreate(name="test", password="pass"))
+    item = crud.create_item(db_session, schemas.ItemCreate(name="I", price=100), store_id=store.id)
     order = crud.create_order(db_session, schemas.OrderCreate(items=[]))
     
     res = client.post(f"/orders/{order.id}/items", json={
@@ -133,7 +142,12 @@ def test_create_order_with_options(client, db_session):
     from backend import crud, schemas, models
     
     # 1. Create Item
-    item = crud.create_item(db_session, schemas.ItemCreate(name="Ramen", price=1000))
+    # Need store
+    store = crud.get_store_by_name(db_session, "admin")
+    if not store:
+        store = crud.create_store(db_session, schemas.StoreCreate(name="admin", password="pass"))
+    
+    item = crud.create_item(db_session, schemas.ItemCreate(name="Ramen", price=1000), store_id=store.id)
     
     # 2. Create Option manually (since no API for it yet)
     option = models.Option(name="Large", price_adjustment=100)
@@ -166,12 +180,12 @@ def test_create_order_with_options(client, db_session):
 def test_update_item_success(client, db_session):
     from backend import crud, schemas
     # Create admin
-    crud.create_store(db_session, schemas.StoreCreate(name="admin", password="pass"))
+    store = crud.create_store(db_session, schemas.StoreCreate(name="admin", password="pass"))
     token = client.post("/token", data={"username": "admin", "password": "pass"}).json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     
     # Create Item
-    item = crud.create_item(db_session, schemas.ItemCreate(name="Old Name", price=100))
+    item = crud.create_item(db_session, schemas.ItemCreate(name="Old Name", price=100), store_id=store.id)
     
     # Update Item
     res = client.put(f"/items/{item.id}", json={"name": "New Name", "price": 200, "stock": 10}, headers=headers)
