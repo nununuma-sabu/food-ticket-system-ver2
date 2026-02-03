@@ -19,17 +19,17 @@
 ```mermaid
 graph TD
     subgraph Stores["店舗 (x 1,000)"]
-        StoreA[店舗A 端末]
-        StoreB[店舗B 端末]
-        StoreN[店舗N 端末...]
+        StoreA["店舗A 端末"]
+        StoreB["店舗B 端末"]
+        StoreN["店舗N 端末..."]
     end
 
     Internet((Internet))
 
     subgraph Cloud["クラウド / 本部"]
-        LB[Load Balancer]
-        API[API Servers (FastAPI)]
-        DB[(Database)]
+        LB["Load Balancer"]
+        API["API Servers (FastAPI)"]
+        DB[("Database")]
     end
 
     StoreA --> Internet
