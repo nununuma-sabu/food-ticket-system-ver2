@@ -38,7 +38,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         token_data = schemas.TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = crud.get_store_by_name(db, name=token_data.username)
+    user = crud.get_store_by_code(db, code=token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -62,7 +62,8 @@ app.add_middleware(
 
 @app.post("/token", response_model=schemas.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = crud.get_store_by_name(db, form_data.username)
+    # Authenticate by CODE (username field in form_data will hold the code)
+    user = crud.get_store_by_code(db, form_data.username)
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -71,7 +72,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         )
     access_token_expires = auth.timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = auth.create_access_token(
-        data={"sub": user.name}, expires_delta=access_token_expires
+        data={"sub": user.code}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 

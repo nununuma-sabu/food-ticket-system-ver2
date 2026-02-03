@@ -25,6 +25,9 @@ def update_item(db: Session, item_id: int, item: schemas.ItemCreate):
 def get_store_by_name(db: Session, name: str):
     return db.query(models.Store).filter(models.Store.name == name).first()
 
+def get_store_by_code(db: Session, code: str):
+    return db.query(models.Store).filter(models.Store.code == code).first()
+
 def create_store(db: Session, store: schemas.StoreCreate):
     hashed_password = auth.get_password_hash(store.password)
     db_store = models.Store(name=store.name, hashed_password=hashed_password)

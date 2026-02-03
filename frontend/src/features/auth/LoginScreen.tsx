@@ -56,7 +56,7 @@ export const LoginScreen = ({ onLoginSuccess }: Props) => {
                 <h2 style={{ textAlign: 'center', marginBottom: '1rem', color: '#2c3e50' }}>店舗ログイン</h2>
                 {error && <p style={{ color: '#e74c3c', fontSize: '0.9rem', textAlign: 'center' }}>{error}</p>}
                 <div>
-                    <label style={{ fontSize: '0.9rem', color: '#666', fontWeight: 'bold' }}>店舗ID</label>
+                    <label style={{ fontSize: '0.9rem', color: '#666', fontWeight: 'bold' }}>店舗ID (例: 1004)</label>
                     <input
                         type="text"
                         value={username}

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MenuItem } from './features/menu/MenuItem';
 import { Cart } from './features/cart/Cart';
 import { OrderHistory } from './features/order/OrderHistory';
 import { PaymentModal } from './features/payment/PaymentModal';
-import { ThankYouScreen } from './features/payment/ThankYouScreen';
+// import { ThankYouScreen } from './features/payment/ThankYouScreen'; // Replaced by TicketScreen
+import { TicketScreen } from './features/ticket/TicketScreen';
 import { StandbyScreen } from './features/standby/StandbyScreen';
 import { Notification } from './features/notification/Notification';
 import { LoginScreen } from './features/auth/LoginScreen';
@@ -17,8 +18,17 @@ import { useOrderSession } from './features/order/useOrderSession';
 import { useNotification } from './features/notification/useNotification';
 
 export const KioskApp = () => {
-    const [appState, setAppState] = useState<'LOGIN' | 'STANDBY' | 'FACE_AUTH' | 'ORDERING'>('LOGIN');
+    // Add TICKET state
+    const [appState, setAppState] = useState<'LOGIN' | 'STANDBY' | 'FACE_AUTH' | 'ORDERING' | 'TICKET'>('LOGIN');
     const [selectedCategory, setSelectedCategory] = useState<string>('全体');
+    // Track the last confirmed order to show on ticket
+    // sessionOrders is an array, we might want to show the specific order just paid or all?
+    // Usually Ticket Screen shows "What you just bought".
+    // Since checkout completes the *session* in simple flow, sessionOrders might be cleared in completeSession.
+    // We need to capture the current orders before clearing.
+
+    // Actually, useOrderSession might clear sessionOrders on completeSession.
+    // Let's assume sessionOrders persists until completeSession is called.
 
     const { isAuthenticated } = useAuth();
     const { items } = useMenu();
@@ -27,7 +37,7 @@ export const KioskApp = () => {
         sessionOrders,
         isPaymentModalOpen,
         setIsPaymentModalOpen,
-        isThankYouVisible,
+        // isThankYouVisible, // We won't use the simple ThankYouScreen hook state
         completeSession,
         sendOrder,
         checkout,
@@ -63,15 +73,18 @@ export const KioskApp = () => {
     const handleCheckout = async (method: string) => {
         try {
             await checkout(method);
+            // Instead of auto-completing, go to Ticket Screen
+            setAppState('TICKET');
+            setIsPaymentModalOpen(false);
         } catch (e) {
             showNotification('お支払いに失敗しました', 'error');
         }
     };
 
-    const handleThankYouComplete = () => {
-        completeSession();
+    const handleTicketComplete = useCallback(() => {
+        completeSession(); // Clean up session
         setAppState('STANDBY');
-    };
+    }, [completeSession]);
 
     if (!isAuthenticated || appState === 'LOGIN') {
         return <LoginScreen onLoginSuccess={() => setAppState('STANDBY')} />;
@@ -90,6 +103,15 @@ export const KioskApp = () => {
                 }}
             />
         );
+    }
+
+    if (appState === 'TICKET') {
+        // Show the most recent order or merged session orders?
+        // Let's show the last one for simplicity, or we should merge them visually.
+        // For ticket: ideally one ticket per "Order" or summary.
+        // Let's pass the last order in sessionOrders if available.
+        const lastOrder = sessionOrders.length > 0 ? sessionOrders[sessionOrders.length - 1] : null;
+        return <TicketScreen order={lastOrder} onComplete={handleTicketComplete} />;
     }
 
     return (
@@ -172,9 +194,7 @@ export const KioskApp = () => {
                 visible={notification.visible}
                 onClose={closeNotification}
             />
-            {isThankYouVisible && (
-                <ThankYouScreen onComplete={handleThankYouComplete} />
-            )}
+            {/* Removed ThankYouScreen in favor of TicketScreen */}
         </div>
     );
 };

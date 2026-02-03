@@ -41,27 +41,32 @@ def seed_stores():
         
         default_password_hash = get_password_hash("password")
 
-        for office in WARD_OFFICES:
+        for idx, office in enumerate(WARD_OFFICES):
             store_name = office["name"]
             address = office["address"]
+            # ID rules: 1000 + idx + 1 (e.g., 1001, 1002...)
+            store_code = str(1001 + idx)
 
             existing_store = db.query(Store).filter(Store.name == store_name).first()
             if not existing_store:
                 new_store = Store(
                     name=store_name,
+                    code=store_code,
                     hashed_password=default_password_hash,
                     address=address
                 )
                 db.add(new_store)
-                print(f"Added store: {store_name}")
+                print(f"Added store: {store_name} (Code: {store_code})")
             else:
-                # Update address if it's missing (optional, but good for consistency)
+                # Update code if missing
+                if not existing_store.code:
+                    existing_store.code = store_code
+                    print(f"Updated code for: {store_name} -> {store_code}")
+                # Update address if it's missing
                 if not existing_store.address:
                     existing_store.address = address
                     print(f"Updated address for: {store_name}")
-                else:
-                    print(f"Store already exists: {store_name}")
-        
+                
         db.commit()
         print("Store seeding completed successfully!")
 

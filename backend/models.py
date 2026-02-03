@@ -25,6 +25,7 @@ class Store(Base):
     __tablename__ = "stores"
 
     id = Column(Integer, primary_key=True, index=True)
+    code = Column(String, unique=True, index=True) # login_id
     name = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     address = Column(String, nullable=True)
