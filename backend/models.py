@@ -17,6 +17,9 @@ class Item(Base):
     image_url = Column(String, nullable=True)
     category = Column(String, nullable=True, index=True)
     stock = Column(Integer, default=10) # Default stock for existing items
+    store_id = Column(Integer, ForeignKey("stores.id"))
+    
+    store = relationship("Store")
 
 class Store(Base):
     __tablename__ = "stores"
@@ -24,6 +27,7 @@ class Store(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
     hashed_password = Column(String)
+    address = Column(String, nullable=True)
 
 class Order(Base):
     __tablename__ = "orders"
