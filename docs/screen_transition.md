@@ -9,11 +9,13 @@ graph TD
         K_FaceAuth -->|認証完了| K_Ordering["注文入力画面"]
         
         %% 注文フロー
-        K_Ordering -->|商品選択| K_Cart["カート追加"]
+        %% 注文フロー
+        K_Ordering -->|商品選択| K_Option["オプション選択(モーダル)"]
+        K_Option -->|決定| K_Cart["カート追加"]
         K_Cart --> K_Ordering
         K_Ordering -->|会計ボタン| K_Payment["決済画面(モーダル)"]
-        K_Payment -->|支払完了| K_ThankYou["完了画面"]
-        K_ThankYou -->|セッション終了| K_Standby
+        K_Payment -->|支払完了| K_Ticket["食券画面(来店番号)"]
+        K_Ticket -->|自動/ボタン| K_Standby
     end
 
     %% 管理画面 (スタッフ用)
