@@ -30,7 +30,7 @@ def get_store_by_code(db: Session, code: str):
 
 def create_store(db: Session, store: schemas.StoreCreate):
     hashed_password = auth.get_password_hash(store.password)
-    db_store = models.Store(name=store.name, hashed_password=hashed_password)
+    db_store = models.Store(name=store.name, code=store.name, hashed_password=hashed_password)
     db.add(db_store)
     db.commit()
     db.refresh(db_store)
